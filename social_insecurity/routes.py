@@ -216,7 +216,6 @@ def register_routes(app):
             return redirect(url_for("index"))
 
         if friends_form.validate_on_submit():
-            get_friend = f"""
             get_friend = """
                 SELECT *
                 FROM Users
