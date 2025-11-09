@@ -7,7 +7,7 @@ CREATE TABLE [Users] (
   username VARCHAR,
   first_name VARCHAR,
   last_name VARCHAR,
-  [password] VARCHAR,
+  password_hash VARCHAR,
   education VARCHAR DEFAULT 'Unknown',
   employment VARCHAR DEFAULT 'Unknown',
   music VARCHAR DEFAULT 'Unknown',
@@ -41,21 +41,4 @@ CREATE TABLE [Comments](
   [creation_time] DATETIME,
   FOREIGN KEY (p_id) REFERENCES Posts(id),
   FOREIGN KEY (u_id) REFERENCES Users(id)
-);
-
--- --
--- Populate tables with test data
--- --
-
-INSERT INTO Users (
-  username,
-  first_name,
-  last_name,
-  [password]
-)
-VALUES (
-  'test',
-  'Jane',
-  'Doe',
-  'password123'
 );
