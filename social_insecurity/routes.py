@@ -60,14 +60,22 @@ def register_routes(app):
                 flash("Username taken", category="warning")
             else:
                 hashed_pw = bcrypt.generate_password_hash(register_form.password.data).decode("utf-8")
-                sqlite.query(
-                    "INSERT INTO Users (username, first_name, last_name, password) VALUES (?, ?, ?, ?);",
-                    register_form.username.data,
-                    register_form.first_name.data,
-                    register_form.last_name.data,
-                    hashed_pw,
-                )
-                return redirect(url_for("index"))
+
+            insert_user = """
+            INSERT INTO Users (username, first_name, last_name, password)
+            VALUES (:username, :first_name, :last_name, :password);
+            """
+
+            sqlite.query(
+                insert_user,
+                {
+                    "username": register_form.username.data.strip(),
+                    "first_name": register_form.first_name.data.strip(),
+                    "last_name": register_form.last_name.data.strip(),
+                    "password": hashed_pw,
+                }
+            )
+            return redirect(url_for("index"))
 
         return render_template("index.html.j2", title="Welcome", form=index_form)
     
