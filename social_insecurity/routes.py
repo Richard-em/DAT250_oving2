@@ -153,6 +153,7 @@ def register_routes(app):
 
 
     @app.route("/comments/<string:username>/<int:post_id>", methods=["GET", "POST"])
+    @login_required
     def comments(username: str, post_id: int):
         """Provides the comments page for the application.
 
@@ -194,8 +195,8 @@ def register_routes(app):
             "comments.html.j2", title="Comments", username=username, form=comments_form, post=post, comments=comments
         )
 
-
     @app.route("/friends/<string:username>", methods=["GET", "POST"])
+    @login_required
     def friends(username: str):
         """Provides the friends page for the application.
 
@@ -255,6 +256,7 @@ def register_routes(app):
 
 
     @app.route("/profile/<string:username>", methods=["GET", "POST"])
+    @login_required
     def profile(username: str):
         """Provides the profile page for the application.
 
@@ -305,6 +307,7 @@ def register_routes(app):
     # Changed to protect against unathorized access of files
     # Checks for traversal-enabling chars, path within upload dir, existence of file, permitted extension.
     @app.route("/uploads/<string:filename>")
+    @login_required
     def uploads(filename):
         """Provides an endpoint for serving uploaded files."""
         uploads_dir = Path(app.instance_path) / app.config["UPLOADS_FOLDER_PATH"]
