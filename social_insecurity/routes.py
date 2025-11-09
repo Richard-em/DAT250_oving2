@@ -48,7 +48,6 @@ def register_routes(app):
 
             if not user:
                 flash("Sorry, this user does not exist!", category="warning")
-            elif not bcrypt.check_password_hash(user.password, login_form.password.data):
             elif bcrypt.check_password_hash(user.password, login_form.password.data):
                 login_user(user, remember=login_form.remember_me.data)
                 return redirect(url_for("stream", username=login_form.username.data))
