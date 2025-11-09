@@ -7,7 +7,7 @@ CREATE TABLE [Users] (
   username VARCHAR,
   first_name VARCHAR,
   last_name VARCHAR,
-  password_hash VARCHAR,
+  password VARCHAR,
   education VARCHAR DEFAULT 'Unknown',
   employment VARCHAR DEFAULT 'Unknown',
   music VARCHAR DEFAULT 'Unknown',
