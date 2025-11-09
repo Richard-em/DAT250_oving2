@@ -10,8 +10,8 @@ class User(UserMixin):
 
     @staticmethod
     def get_by_username(username: str):
-        query = "SELECT * FROM Users WHERE username = ?;"
-        row = sqlite.query(query, username, one=True)
+        query = "SELECT * FROM Users WHERE username = :username;"
+        row = sqlite.query(query, {"username": username}, one=True)
         if row:
             return User(row["id"], row["username"], row["password"])
         return None
