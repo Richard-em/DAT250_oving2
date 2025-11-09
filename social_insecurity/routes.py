@@ -92,13 +92,16 @@ def register_routes(app):
             )
             return redirect(url_for("stream", username=username))
 
-        get_posts = sqlite.query("""
+        posts = sqlite.query("""
             SELECT p.*, u.*, (SELECT COUNT(*) FROM Comments WHERE p_id = p.id) AS cc
-            FROM Posts AS p JOIN Users AS u ON u.id = p.u_id
-            WHERE p.u_id IN (SELECT u_id FROM Friends WHERE f_id = {user["id"]}) OR p.u_id IN (SELECT f_id FROM Friends WHERE u_id = {user["id"]}) OR p.u_id = {user["id"]}
+            FROM Posts AS p
+            JOIN Users AS u ON u.id = p.u_id
+            WHERE p.u_id IN (SELECT u_id FROM Friends WHERE f_id = ?)
+                OR p.u_id IN (SELECT f_id FROM Friends WHERE u_id = ?)
+                OR p.u_id = ?
             ORDER BY p.creation_time DESC;
-            """)
-        posts = sqlite.query(get_posts)
+        """, user.id, user.id, user.id)
+        
         return render_template("stream.html.j2", title="Stream", username=username, form=post_form, posts=posts)
 
 
@@ -118,7 +121,7 @@ def register_routes(app):
             """
         user = sqlite.query(get_user, one=True)
 
-        if comments_form.is_submitted():
+        if comments_form.validate_on_submit():
             insert_comment = f"""
                 INSERT INTO Comments (p_id, u_id, comment, creation_time)
                 VALUES ({post_id}, {user["id"]}, '{comments_form.comment.data}', CURRENT_TIMESTAMP);
@@ -159,7 +162,7 @@ def register_routes(app):
             """
         user = sqlite.query(get_user, one=True)
 
-        if friends_form.is_submitted():
+        if friends_form.validate_on_submit():
             get_friend = f"""
                 SELECT *
                 FROM Users
@@ -212,7 +215,7 @@ def register_routes(app):
             """
         user = sqlite.query(get_user, one=True)
 
-        if profile_form.is_submitted():
+        if profile_form.validate_on_submit():
             update_profile = f"""
                 UPDATE Users
                 SET education='{profile_form.education.data}', employment='{profile_form.employment.data}',
