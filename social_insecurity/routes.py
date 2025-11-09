@@ -22,11 +22,12 @@ from social_insecurity.user import User
 
 @login.user_loader
 def load_user(user_id):
-    query = "SELECT * FROM Users WHERE id = ?;"
-    user = sqlite.query(query, user_id, one=True)
+    query = "SELECT * FROM Users WHERE id = :userid;"
+    user = sqlite.query(query, {"userid": user_id}, one=True)
     if user:
         return User(user["id"], user["username"], user["password"])
     return None
+
 def register_routes(app):
     @app.route("/", methods=["GET", "POST"])
     @app.route("/index", methods=["GET", "POST"])
@@ -41,17 +42,18 @@ def register_routes(app):
         index_form = IndexForm()
         login_form = index_form.login
         register_form = index_form.register
-        
+
         if login_form.validate_on_submit() and login_form.submit.data:
             user = User.get_by_username(login_form.username.data)
 
             if not user:
                 flash("Sorry, this user does not exist!", category="warning")
             elif not bcrypt.check_password_hash(user.password, login_form.password.data):
-                flash("Sorry, wrong password!", category="warning")
-            else:
+            elif bcrypt.check_password_hash(user.password, login_form.password.data):
                 login_user(user, remember=login_form.remember_me.data)
                 return redirect(url_for("stream", username=login_form.username.data))
+            else:
+                flash("Sorry, wrong password!", category="warning")
 
         elif register_form.validate_on_submit() and register_form.submit.data:
             existing = User.get_by_username(register_form.username.data)
