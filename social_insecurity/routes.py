@@ -5,10 +5,19 @@ It also contains the SQL queries used for communicating with the database.
 """
 
 from pathlib import Path
-from flask import current_app as app, flash, redirect, render_template, request, send_from_directory, url_for
+
+from flask import current_app as app
+from flask import flash, redirect, render_template, send_from_directory, url_for
+
 from flask_login import current_user, login_user, logout_user, login_required
 from social_insecurity import sqlite, bcrypt, login
-from social_insecurity.forms import IndexForm, PostForm, CommentsForm, FriendsForm, ProfileForm
+
+from flask import abort  # added
+from werkzeug.utils import secure_filename  # added
+
+from social_insecurity import sqlite
+from social_insecurity.forms import CommentsForm, FriendsForm, IndexForm, PostForm, ProfileForm
+
 from social_insecurity.user import User
 
 @login.user_loader
