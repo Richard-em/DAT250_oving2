@@ -50,8 +50,23 @@ def create_app(test_config=None) -> Flask:
     return app
 
 
+# Changed function below to protect against potential changes to UPLOADS_FOLDER_PATH
+# Keeps folder in flask instance, .resolve() for paths, prevent overwriting files with folders
 def create_uploads_folder(app: Flask) -> None:
-    """Create the instance and upload folders."""
-    upload_path = Path(app.instance_path) / cast(str, app.config["UPLOADS_FOLDER_PATH"])
-    if not upload_path.exists():
-        upload_path.mkdir(parents=True)
+    """Safely ensure the instance and uploads folders exist."""
+    instance_path = Path(app.instance_path)
+    uploads_rel = cast(str, app.config["UPLOADS_FOLDER_PATH"])
+    upload_path = instance_path / uploads_rel
+
+    # Ensure the uploads path is inside the instance directory
+    try:
+        upload_path.resolve(strict=False).relative_to(
+            instance_path.resolve(strict=True))
+    except Exception:
+        raise ValueError(f"Unsafe UPLOADS_FOLDER_PATH: {uploads_rel}")
+
+    if upload_path.exists() and not upload_path.is_dir():
+        raise RuntimeError(
+            f"Expected uploads folder, but found a file at {upload_path}")
+
+    upload_path.mkdir(parents=True, exist_ok=True)

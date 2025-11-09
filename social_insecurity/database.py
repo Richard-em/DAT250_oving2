@@ -126,6 +126,24 @@ class SQLite3:
         self.connection.commit()
         return response
 
+    def query(self, query: str, params=None, one: bool = False):
+        cursor = None
+        try:
+            if params is None:
+                cursor = self.connection.execute(query)
+            elif isinstance(params, dict):
+                # support for named parameters
+                cursor = self.connection.execute(query, params)
+            else:
+                # support for positional parameters
+                cursor = self.connection.execute(query, tuple(params))
+            result = cursor.fetchone() if one else cursor.fetchall()
+            return result
+        finally:
+            if cursor is not None:
+                cursor.close()
+            self.connection.commit()
+
     # TODO: Add more specific query methods to simplify code
 
     def _init_database(self, schema: PathLike | str) -> None:
@@ -136,6 +154,7 @@ class SQLite3:
 
     def _close_connection(self, exception: Optional[BaseException] = None) -> None:
         """Closes the connection to the database."""
-        conn = cast(sqlite3.Connection, getattr(g, "flask_sqlite3_connection", None))
+        conn = cast(sqlite3.Connection, getattr(
+            g, "flask_sqlite3_connection", None))
         if conn is not None:
             conn.close()

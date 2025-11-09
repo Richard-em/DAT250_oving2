@@ -41,8 +41,10 @@ from wtforms import (
 class LoginForm(FlaskForm):
     """Provides the login form for the application."""
 
-    username = StringField(label="Username", render_kw={"placeholder": "Username"})
-    password = PasswordField(label="Password", render_kw={"placeholder": "Password"})
+    username = StringField(label="Username", render_kw={
+                           "placeholder": "Username"})
+    password = PasswordField(label="Password", render_kw={
+                             "placeholder": "Password"})
     remember_me = BooleanField(
         label="Remember me"
     )  # TODO: It would be nice to have this feature implemented, probably by using cookies
@@ -52,11 +54,16 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     """Provides the registration form for the application."""
 
-    first_name = StringField(label="First Name", render_kw={"placeholder": "First Name"})
-    last_name = StringField(label="Last Name", render_kw={"placeholder": "Last Name"})
-    username = StringField(label="Username", render_kw={"placeholder": "Username"})
-    password = PasswordField(label="Password", render_kw={"placeholder": "Password"})
-    confirm_password = PasswordField(label="Confirm Password", render_kw={"placeholder": "Confirm Password"})
+    first_name = StringField(label="First Name", render_kw={
+                             "placeholder": "First Name"})
+    last_name = StringField(label="Last Name", render_kw={
+                            "placeholder": "Last Name"})
+    username = StringField(label="Username", render_kw={
+                           "placeholder": "Username"})
+    password = PasswordField(label="Password", render_kw={
+                             "placeholder": "Password"})
+    confirm_password = PasswordField(label="Confirm Password", render_kw={
+                                     "placeholder": "Confirm Password"})
     submit = SubmitField(label="Sign Up")
 
 
@@ -70,7 +77,8 @@ class IndexForm(FlaskForm):
 class PostForm(FlaskForm):
     """Provides the post form for the application."""
 
-    content = TextAreaField(label="New Post", render_kw={"placeholder": "What are you thinking about?"})
+    content = TextAreaField(label="New Post", render_kw={
+                            "placeholder": "What are you thinking about?"})
     image = FileField(label="Image")
     submit = SubmitField(label="Post")
 
@@ -78,24 +86,31 @@ class PostForm(FlaskForm):
 class CommentsForm(FlaskForm):
     """Provides the comment form for the application."""
 
-    comment = TextAreaField(label="New Comment", render_kw={"placeholder": "What do you have to say?"})
+    comment = TextAreaField(label="New Comment", render_kw={
+                            "placeholder": "What do you have to say?"})
     submit = SubmitField(label="Comment")
 
 
 class FriendsForm(FlaskForm):
     """Provides the friend form for the application."""
 
-    username = StringField(label="Friend's username", render_kw={"placeholder": "Username"})
+    username = StringField(label="Friend's username", render_kw={
+                           "placeholder": "Username"})
     submit = SubmitField(label="Add Friend")
 
 
 class ProfileForm(FlaskForm):
     """Provides the profile form for the application."""
 
-    education = StringField(label="Education", render_kw={"placeholder": "Highest education"})
-    employment = StringField(label="Employment", render_kw={"placeholder": "Current employment"})
-    music = StringField(label="Favorite song", render_kw={"placeholder": "Favorite song"})
-    movie = StringField(label="Favorite movie", render_kw={"placeholder": "Favorite movie"})
-    nationality = StringField(label="Nationality", render_kw={"placeholder": "Your nationality"})
+    education = StringField(label="Education", render_kw={
+                            "placeholder": "Highest education"})
+    employment = StringField(label="Employment", render_kw={
+                             "placeholder": "Current employment"})
+    music = StringField(label="Favorite song", render_kw={
+                        "placeholder": "Favorite song"})
+    movie = StringField(label="Favorite movie", render_kw={
+                        "placeholder": "Favorite movie"})
+    nationality = StringField(label="Nationality", render_kw={
+                              "placeholder": "Your nationality"})
     birthday = DateField(label="Birthday", default=datetime.now())
     submit = SubmitField(label="Update Profile")
