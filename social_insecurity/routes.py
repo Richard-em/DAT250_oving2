@@ -78,7 +78,8 @@ def register_routes(app):
             return redirect(url_for("index"))
 
         return render_template("index.html.j2", title="Welcome", form=index_form)
-    
+
+
     @app.route("/logout")
     @login_required
     def logout():
