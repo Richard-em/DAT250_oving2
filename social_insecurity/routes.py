@@ -76,8 +76,10 @@ def register_routes(app):
 
         Otherwise, it reads the username from the URL and displays all posts from the user and their friends.
         """
+        if username != current_user.username:
+            return redirect(url_for("stream", username=current_user.username))
         post_form = PostForm()
-        user = User.get_by_username(username)
+        user = User.get_by_username(current_user.username)
 
         if post_form.validate_on_submit():
             filename = ""
@@ -147,6 +149,7 @@ def register_routes(app):
 
 
     @app.route("/friends/<string:username>", methods=["GET", "POST"])
+    @login_required
     def friends(username: str):
         """Provides the friends page for the application.
 
@@ -154,52 +157,48 @@ def register_routes(app):
 
         Otherwise, it reads the username from the URL and displays all friends of the user.
         """
-        friends_form = FriendsForm()
-        get_user = f"""
-            SELECT *
-            FROM Users
-            WHERE username = '{username}';
-            """
-        user = sqlite.query(get_user, one=True)
+        if username != current_user.username:
+            return redirect(url_for("friends", username=current_user.username))
+        me = User.get_by_username(current_user.username)
+        form = FriendsForm()
 
-        if friends_form.validate_on_submit():
-            get_friend = f"""
-                SELECT *
-                FROM Users
-                WHERE username = '{friends_form.username.data}';
-                """
-            friend = sqlite.query(get_friend, one=True)
-            get_friends = f"""
-                SELECT f_id
-                FROM Friends
-                WHERE u_id = {user["id"]};
-                """
-            friends = sqlite.query(get_friends)
+        if form.validate_on_submit():
+            friend = sqlite.query("SELECT * FROM Users WHERE username = ?;", form.username.data, one=True)
 
             if friend is None:
                 flash("User does not exist!", category="warning")
-            elif friend["id"] == user["id"]:
+            elif friend["id"] == me.id:
                 flash("You cannot be friends with yourself!", category="warning")
-            elif friend["id"] in [friend["f_id"] for friend in friends]:
-                flash("You are already friends with this user!", category="warning")
             else:
-                insert_friend = f"""
-                    INSERT INTO Friends (u_id, f_id)
-                    VALUES ({user["id"]}, {friend["id"]});
-                    """
-                sqlite.query(insert_friend)
-                flash("Friend successfully added!", category="success")
-
-        get_friends = f"""
-            SELECT *
-            FROM Friends AS f JOIN Users as u ON f.f_id = u.id
-            WHERE f.u_id = {user["id"]} AND f.f_id != {user["id"]};
+                already = sqlite.query(
+                    "SELECT 1 FROM Friends WHERE u_id = ? AND f_id = ?;",
+                    me.id, friend["id"], one=True
+                )
+                if already:
+                    flash("You are alreadyt friends with user", category="warning")
+                else:
+                    sqlite.query(
+                        "INSERT INTO Friends (u_id, f_id) VALUES (?, ?)",
+                        me.id, friend["id"]
+                    )
+                    flash("Friend successfully added")
+            return redirect(url_for("friends", username=current_user.username))
+        
+        friends = sqlite.query(
             """
-        friends = sqlite.query(get_friends)
-        return render_template("friends.html.j2", title="Friends", username=username, friends=friends, form=friends_form)
+            SELECT u.*
+            FROM Friends AS f
+            JOIN Users  AS u ON f.f_id = u.id
+            WHERE f.u_id = ? AND f.f_id != ?
+            """,
+            me.id, me.id
+        )
+
+        return render_template("friends.html.j2", title="Friends", username=username, friends=friends, form=form)
 
 
     @app.route("/profile/<string:username>", methods=["GET", "POST"])
+    @login_required
     def profile(username: str):
         """Provides the profile page for the application.
 
@@ -207,13 +206,10 @@ def register_routes(app):
 
         Otherwise, it reads the username from the URL and displays the user's profile.
         """
+        if username != current_user.username:
+            return redirect(url_for("profile", username=current_user.username))
+        user = User.get_by_username(current_user.username)
         profile_form = ProfileForm()
-        get_user = f"""
-            SELECT *
-            FROM Users
-            WHERE username = '{username}';
-            """
-        user = sqlite.query(get_user, one=True)
 
         if profile_form.validate_on_submit():
             update_profile = f"""
@@ -224,9 +220,9 @@ def register_routes(app):
                 WHERE username='{username}';
                 """
             sqlite.query(update_profile)
-            return redirect(url_for("profile", username=username))
+            return redirect(url_for("profile", username=current_user.username))
 
-        return render_template("profile.html.j2", title="Profile", username=username, user=user, form=profile_form)
+        return render_template("profile.html.j2", title="Profile", username=current_user.username, user=user, form=profile_form)
 
 
     @app.route("/uploads/<string:filename>")
